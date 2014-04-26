@@ -11,7 +11,7 @@ import model.World;
 public class WorldUtils {
 
 	public static List<Player> getRoundPlayers() {
-		List<Player> l = new LinkedList<>();
+		List<Player> l = new LinkedList<Player>();
 		for (Player p : World.getInstance().getPlayers()) {
 			if (p.isInRound()) {
 				l.add(p);

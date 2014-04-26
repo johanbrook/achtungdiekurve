@@ -39,7 +39,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 	
 	public Player() {
 		paintTail = true;
-		this.path = new LinkedList<>();
+		this.path = new LinkedList<Coordinate>();
 		this.name = WorldUtils.generateName();
 		this.color = WorldUtils.generateColor();
 		this.head = new Coordinate(-100, -100, false);
@@ -191,7 +191,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 
 	public boolean collideWith(Player p) {
 		if (path.size() > 1) {
-			LinkedList<Coordinate> op = new LinkedList<>(p.path);
+			LinkedList<Coordinate> op = new LinkedList<Coordinate>(p.path);
 			if (p != this) {
 				op.add(p.head);
 			} else {

@@ -1,2 +1,4 @@
 *.class
 Achtung/sources.txt
+*.classpath
+*.project
