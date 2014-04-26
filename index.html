@@ -14,7 +14,7 @@
       var leftDown, rightDown,
 
       config = {
-        width: 800,
+        width: 1000,
         height: 600,
         strokeSize: 5,
         host: "83.209.183.141",
@@ -122,16 +122,25 @@
               break;
           case "newRound":
               this.animator.clear()
+              var data = message.data
+              if (data.players) {
+                  this.animator.showScoreboard(data.players)
+              }
               break;
           case "world":
               this.sendDirection()
               var data = message.data
               if (data.players) {
                   this.animator.drawPlayers(data.players)
-                  this.animator.showScoreboard(data.players)
               }
 
               //this.animator.showText("Round: "+data.round)
+              break;
+          case "score":
+              var data = message.data
+              if (data.players) {
+                  this.animator.showScoreboard(data.players)
+              }
               break;
           }
       }
@@ -163,16 +172,20 @@
       }
 
       Animator.prototype.clear = function () {
-          this.ctx.clearRect(0, 0, this.bounds.width, this.bounds.height)
+          this.ctx.clearRect(0, 0, this.bounds.width-200, this.bounds.height)
       }
 
+	  Animator.prototype.clearScore = function () {
+          this.ctx.fillStyle = "#202020"
+          this.ctx.fillRect(this.bounds.width-200, 0, this.bounds.height, this.bounds.width)
+      }
+	  
       Animator.prototype.showScoreboard = function (players) {
-          this.ctx.fillStyle = "white"
+		  this.clearScore()
           this.ctx.font = "bold 16px Arial"
-          var interval = 50
-
           players.forEach(function (player, index) {
-              this.ctx.fillText("round", (index + 1) * interval, 20)
+			  this.ctx.fillStyle = player.color
+              this.ctx.fillText(player.name + ": "+player.points,this.bounds.width-200, index*40+40)
           }.bind(this))
       }
 

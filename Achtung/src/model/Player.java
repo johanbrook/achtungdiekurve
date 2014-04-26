@@ -12,7 +12,7 @@ import util.WorldUtils;
 import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 
-public class Player implements WebSocket.OnTextMessage {
+public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 
 	@Expose
 	private String color;
@@ -31,11 +31,12 @@ public class Player implements WebSocket.OnTextMessage {
 	private boolean isAlive;
 	private Connection con;
 	private double direction;
-	private double speed = 2;
+	private double speed = 3;
 	private PlayerCommand pc;
 	private boolean paintTail;
 	private int stepsToChangePaint;
-
+	private double dirChange = 10;
+	
 	public Player() {
 		paintTail = true;
 		this.path = new LinkedList<>();
@@ -109,9 +110,9 @@ public class Player implements WebSocket.OnTextMessage {
 	public void updateMove() {
 		if (pc != null) {
 			if (pc.getDirection() != null && pc.getDirection().equals("left")) {
-				direction -= 10 + 360;
+				direction -= dirChange + 360;
 			} else if (pc.getDirection() != null && pc.getDirection().equals("right")) {
-				direction += 10;
+				direction += dirChange;
 			} else if (pc.getName() != null) {
 				if (!WorldUtils.containName(pc.getName())) {
 					setName(pc.getName());
@@ -209,5 +210,10 @@ public class Player implements WebSocket.OnTextMessage {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public int compareTo(Player o) {
+		return o.points-points;
 	}
 }

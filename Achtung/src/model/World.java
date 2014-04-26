@@ -3,6 +3,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class World implements ActionListener {
 			p.newRound();
 		}
 		roundPlayers = WorldUtils.getRoundPlayers();
-		send(new JsonObject("newRound", null));
+		send(new JsonObject("newRound", this));
 	}
 
 	private void endRound(Player winner, boolean send) {
@@ -97,11 +98,13 @@ public class World implements ActionListener {
 					if (p.isOutsideRange(worldSize)) {
 						p.setAlive(false);
 						givePointsToAllBut(p);
+						send(new JsonObject("score", this));
 					} else {
 						for (Player e : roundPlayers) {
 							if (p.collideWith(e)) {
 								p.setAlive(false);
 								givePointsToAllBut(p);
+								send(new JsonObject("score", this));
 							}
 						}
 					}
@@ -117,6 +120,7 @@ public class World implements ActionListener {
 				pp.addPoint();
 			}
 		}
+		Collections.sort(players);
 	}
 
 	public void playerConnect(Player p) {
