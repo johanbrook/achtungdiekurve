@@ -2,3 +2,5 @@
 Achtung/sources.txt
 *.classpath
 *.project
+*.prefs
+*.jar
