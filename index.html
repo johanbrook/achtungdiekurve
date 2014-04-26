@@ -9,7 +9,8 @@
           return Object.keys(obj).map(function(key) { return obj[key] }).indexOf(prop) !== -1
         }
       }
-	  var gotUpdateSinceKey = false;
+	  var leftDown;
+	  var rightDown;
       var init = function() {
         console.log("Init game")
 
@@ -27,32 +28,52 @@
 
         this.keys = { left: 37, right: 39 }
 
-        document.addEventListener("keydown", this.changeDirection.bind(this))
-
+        document.addEventListener("keydown", this.keyDown.bind(this))
+		document.addEventListener("keyup", this.keyUp.bind(this))
+		
         this.socket = new WebSocket("ws://83.209.183.141:8881/command")
         this.socket.onmessage = this.update.bind(this)
         this.socket.onclose = this.disconnect.bind(this)
       }
 
-      Game.prototype.changeDirection = function(evt) {
-        if(!Helpers.isObjectValue(this.keys, evt.keyCode)) return;
-		if(!gotUpdateSinceKey) return;
-		
-        evt.preventDefault()
-
-        var key = evt.keyCode,
+	  Game.prototype.keyDown = function(evt) {
+		var key = evt.keyCode,
             dir = null
         switch(key) {
-        case this.keys.left: dir = "left"; break;
-        case this.keys.right: dir = "right"; break;
-        default: dir = null;
+			case this.keys.left: leftDown = Date.now(); break;
+			case this.keys.right: rightDown = Date.now(); break;
         }
+	  }
+	 
 
-        this.socket.send(JSON.stringify({
-          direction: dir
-        }))
-		gotUpdateSinceKey = false;
+	  Game.prototype.keyUp = function(evt) {
+		var key = evt.keyCode,
+            dir = null
+        switch(key) {
+			case this.keys.left: leftDown = null; break;
+			case this.keys.right: rightDown = null; break;
+        }
+	  }	 
+	  
+      Game.prototype.sendDirection = function() {
+		if(leftDown && rightDown){
+			var keyPressed = "left"
+			if(leftDown < rightDown){
+				keyPressed = "right"
+			}			
+			this.send(keyPressed)
+		}else if(leftDown){
+			this.send("left")
+		}else if(rightDown){
+			this.send("right")
+		}  
       }
+	  
+	  Game.prototype.send = function(dir) {		
+		this.socket.send(JSON.stringify({
+			direction: dir
+		}))
+	  }
 
       Game.prototype.disconnect = function(evt) {
         console.log("Server disconnected")
@@ -81,7 +102,7 @@
           this.animator.clear()
           break;
         case "world":
-		  gotUpdateSinceKey = true;
+		  this.sendDirection()
           var data = message.data
           if(data.players) {
             this.animator.drawPlayers(data.players)
