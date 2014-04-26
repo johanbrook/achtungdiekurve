@@ -6,7 +6,19 @@ The system is completely directed by the server. I.e., all logic resides in Java
 
 ## Usage
 
+This project is using Maven for building and dependency management.
 
+  mvn clean compile assembly:single
+
+A `.jar` file is available in the `target` directory.
+
+  java -jar target/achtungdiekurve-0.0.1-SNAPSHOT-jar-with-dependencies.jar
+
+Open `index.html` in a modern browser (you have to tweak the `config.host` value to `localhost` in order to play locally) and play with friends!
+
+## To do
+
+- Specify which server to connect to
 
 ## Authors
 
