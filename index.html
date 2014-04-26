@@ -124,7 +124,7 @@
               this.animator.clear()
               var data = message.data
               if (data.players) {
-                  this.animator.showScoreboard(data.players)
+                  this.animator.showScoreboard(data.round, data.players)
               }
               break;
           case "world":
@@ -139,7 +139,7 @@
           case "score":
               var data = message.data
               if (data.players) {
-                  this.animator.showScoreboard(data.players)
+                  this.animator.showScoreboard(data.round, data.players)
               }
               break;
           }
@@ -180,12 +180,15 @@
           this.ctx.fillRect(this.bounds.width-200, 0, this.bounds.height, this.bounds.width)
       }
 	  
-      Animator.prototype.showScoreboard = function (players) {
+      Animator.prototype.showScoreboard = function (round, players) {
 		  this.clearScore()
-          this.ctx.font = "bold 16px Arial"
+          this.ctx.font = "bold 24px Arial"
+		  this.ctx.fillStyle = "white"
+          this.ctx.fillText("Round: "+round,this.bounds.width-180, 60)
+		  this.ctx.font = "bold 16px Arial"
           players.forEach(function (player, index) {
 			  this.ctx.fillStyle = player.color
-              this.ctx.fillText(player.name + ": "+player.points,this.bounds.width-200, index*40+40)
+              this.ctx.fillText(player.name + ": "+player.points,this.bounds.width-180, index*40+200)
           }.bind(this))
       }
 
