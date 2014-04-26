@@ -72,23 +72,28 @@
       }
 
       Game.prototype.sendDirection = function () {
-          if (leftDown && rightDown) {
-              var keyPressed = "left"
-              if (leftDown < rightDown) {
-                  keyPressed = "right"
-              }
-              this.send(keyPressed)
-          } else if (leftDown) {
-              this.send("left")
-          } else if (rightDown) {
-              this.send("right")
-          }
-      }
+        var dirs = { LEFT: "left", RIGHT: "right" }
 
-      Game.prototype.send = function (dir) {
+        function send(dir) {
           this.socket.send(JSON.stringify({
               direction: dir
           }))
+        }
+
+        if (leftDown && rightDown) {
+          var keyPressed = dirs.LEFT
+
+          if (leftDown < rightDown) {
+              keyPressed = dirs.RIGHT
+          }
+
+          send(keyPressed)
+
+        } else if (leftDown) {
+          send(dirs.LEFT)
+        } else if (rightDown) {
+          send(dirs.RIGHT)
+        }
       }
 
       Game.prototype.disconnect = function (evt) {
