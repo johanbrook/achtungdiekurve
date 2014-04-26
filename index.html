@@ -167,9 +167,9 @@
       Animator.prototype.showText = function (text,color) {
           this.clear()
 		  if(color){
-			this.ctx.fillStyle = "white"
-		  }else{
 			this.ctx.fillStyle = color
+		  }else{
+			this.ctx.fillStyle = "white"
 		  }
           this.ctx.font = "bold 24px Arial"
           this.ctx.fillText(text, (this.bounds.width - 300) / 2, this.bounds.height / 2)
