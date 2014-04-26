@@ -1,4 +1,5 @@
 package model;
+
 import java.awt.Dimension;
 import java.awt.geom.Line2D;
 import java.io.IOException;
@@ -23,14 +24,17 @@ public class Player implements WebSocket.OnTextMessage {
 	@Expose
 	private Coordinate head;
 	@Expose
+	private Coordinate lasthead;
+	@Expose
 	private boolean inRound;
 	@Expose
 	private boolean isAlive;
 	private Connection con;
-	private int direction;
-	private int speed = 2;
+	private double direction;
+	private double speed = 2;
 	private PlayerCommand pc;
 	private boolean paintTail;
+	private int stepsToChangePaint;
 
 	public Player() {
 		paintTail = true;
@@ -119,8 +123,17 @@ public class Player implements WebSocket.OnTextMessage {
 		double x = speed * Math.cos(Math.toRadians(direction));
 		double y = speed * Math.sin(Math.toRadians(direction));
 		path.add(head);
+		lasthead = head;
 		head = new Coordinate(head.x + x, head.y + y, paintTail);
 		pc = null;
+		if (stepsToChangePaint-- == 0) {
+			paintTail = !paintTail;
+			if (paintTail) {
+				stepsToChangePaint = (int) (Math.random() * 300);
+			} else {
+				stepsToChangePaint = 5;
+			}
+		}
 	}
 
 	public void send(String s) throws IOException {
@@ -142,6 +155,9 @@ public class Player implements WebSocket.OnTextMessage {
 	}
 
 	public void newRound() {
+		stepsToChangePaint = (int) (Math.random() * 300);
+		paintTail = true;
+		direction = Math.random() * 360;
 		path = new LinkedList<Coordinate>();
 		head = WorldUtils.generateHead();
 		inRound = true;
