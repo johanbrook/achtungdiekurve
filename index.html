@@ -76,11 +76,11 @@
       Game.prototype.sendDirection = function () {
         var dirs = { LEFT: "left", RIGHT: "right" }
 
-        function send(dir) {
+        var send = function(dir) {
           this.socket.send(JSON.stringify({
               direction: dir
           }))
-        }
+        }.bind(this)
 
         if (leftDown && rightDown) {
           var keyPressed = dirs.LEFT
