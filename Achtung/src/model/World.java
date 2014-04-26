@@ -116,7 +116,7 @@ public class World implements ActionListener {
 
 	public void givePointsToAllBut(Player p) {
 		for (Player pp : roundPlayers) {
-			if (!p.equals(pp)) {
+			if (!p.equals(pp) && pp.isAlive()) {
 				pp.addPoint();
 			}
 		}
