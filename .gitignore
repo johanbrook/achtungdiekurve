@@ -4,3 +4,4 @@ Achtung/sources.txt
 *.project
 *.prefs
 *.jar
+target/
