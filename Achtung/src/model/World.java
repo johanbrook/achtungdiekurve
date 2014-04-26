@@ -27,10 +27,13 @@ public class World implements ActionListener {
 	private List<Player> roundPlayers;
 	private Timer t;
 	private Gson gson;
+	@Expose
+	private int roundDelay;
 
 	private World() {
 		gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		t = new Timer(40, this);
+		roundDelay = 3000;
 		players = new LinkedList<Player>();
 		worldSize = new Dimension(800, 600);
 	}
@@ -87,7 +90,7 @@ public class World implements ActionListener {
 		if (alive != null) {
 			endRound(alive, true);
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(roundDelay);
 			} catch (InterruptedException e) {
 			}
 			newRound();
