@@ -91,12 +91,10 @@ public class Player implements WebSocket.OnTextMessage {
 
 	@Override
 	public void onMessage(String msg) {
-		if (msg.contains("direction")) {
-			try {
-				PlayerCommand c = new Gson().fromJson(msg, PlayerCommand.class);
-				this.pc = c;
-			} catch (Exception e) {
-			}
+		try {
+			PlayerCommand c = new Gson().fromJson(msg, PlayerCommand.class);
+			this.pc = c;
+		} catch (Exception e) {
 		}
 	}
 
@@ -115,7 +113,9 @@ public class Player implements WebSocket.OnTextMessage {
 			} else if (pc.getDirection() != null && pc.getDirection().equals("right")) {
 				direction += 10;
 			} else if (pc.getName() != null) {
-				setName(pc.getName());
+				if (!WorldUtils.containName(pc.getName())) {
+					setName(pc.getName());
+				}
 			}
 		}
 

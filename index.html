@@ -29,7 +29,7 @@
 
         document.addEventListener("keydown", this.changeDirection.bind(this))
 
-        this.socket = new WebSocket("ws://localhost:8881/command")
+        this.socket = new WebSocket("ws://83.209.183.141:8881/command")
         this.socket.onmessage = this.update.bind(this)
         this.socket.onclose = this.disconnect.bind(this)
       }

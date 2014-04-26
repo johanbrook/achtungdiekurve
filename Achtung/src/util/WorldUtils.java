@@ -31,7 +31,7 @@ public class WorldUtils {
 		return new Coordinate(x, y, true);
 	}
 
-	private static boolean containHead(int x, int y) {
+	public static boolean containHead(int x, int y) {
 		for (Player p : World.getInstance().getPlayers()) {
 			double dX = p.getHead().x - x;
 			double dY = p.getHead().y - y;
@@ -50,7 +50,7 @@ public class WorldUtils {
 		return prefix + i;
 	}
 
-	private static boolean containName(String name) {
+	public static boolean containName(String name) {
 		for (Player p : World.getInstance().getPlayers()) {
 			if (p.getName().equals(name)) {
 				return true;
@@ -71,7 +71,7 @@ public class WorldUtils {
 		return hex;
 	}
 
-	private static boolean containsSimilarColor(Color c) {
+	public static boolean containsSimilarColor(Color c) {
 		for (Player p : World.getInstance().getPlayers()) {
 			if (p.getColor().equals(c)) {
 				return true;
