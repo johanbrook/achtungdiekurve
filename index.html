@@ -44,11 +44,47 @@
           this.socket = new WebSocket("ws://"+config.host+":"+config.port+"/command")
           this.socket.onmessage = this.update.bind(this)
           this.socket.onclose = this.disconnect.bind(this)
+
+          this.events = {
+            init: function() {
+              this.animator.clear()
+              this.animator.showText("Waiting for players to connect")
+            },
+            end: function(message) {
+              if (message.data) {
+                  var winner = message.data
+                  this.animator.showText(winner.name + " won", winner.color)
+              } else {
+                  this.animator.clear()
+                  this.exit();
+              }
+            },
+            world: function(message) {
+              this.sendDirection()
+              var data = message.data
+              if (data.players) {
+                  this.animator.drawPlayers(data.players)
+              }
+            },
+            score: function(message) {
+              var data = message.data
+              if (data.players) {
+                  this.animator.showScoreboard(data.round, data.players)
+              }
+            },
+            newRound: function(message) {
+              this.animator.clear()
+              var data = message.data
+              if (data.players) {
+                  this.animator.showScoreboard(data.round, data.players)
+              }
+            }
+          }
       }
 
       Game.prototype.keyDown = function (evt) {
-          var key = evt.keyCode,
-              dir = null
+          var key = evt.keyCode
+
           switch (key) {
           case this.keys.left:
               leftDown = Date.now();
@@ -61,8 +97,8 @@
 
 
       Game.prototype.keyUp = function (evt) {
-          var key = evt.keyCode,
-              dir = null
+          var key = evt.keyCode
+
           switch (key) {
           case this.keys.left:
               leftDown = null;
@@ -105,43 +141,8 @@
 
       Game.prototype.update = function (evt) {
           var message = JSON.parse(evt.data)
-
-          switch (message.event) {
-          case "end":
-              if (message.data) {
-                  var winner = message.data
-                  this.animator.showText(winner.name + " won",winner.color)
-              } else {
-                  this.animator.clear()
-                  this.exit();
-              }
-              break;
-          case "init":
-              this.animator.clear()
-              this.animator.showText("Waiting for players to connect")
-              break;
-          case "newRound":
-              this.animator.clear()
-              var data = message.data
-              if (data.players) {
-                  this.animator.showScoreboard(data.round, data.players)
-              }
-              break;
-          case "world":
-              this.sendDirection()
-              var data = message.data
-              if (data.players) {
-                  this.animator.drawPlayers(data.players)
-              }
-
-              //this.animator.showText("Round: "+data.round)
-              break;
-          case "score":
-              var data = message.data
-              if (data.players) {
-                  this.animator.showScoreboard(data.round, data.players)
-              }
-              break;
+          if(Object.keys(this.events).indexOf(message.event) !== -1) {
+            this.events[message.event].call(this, message)
           }
       }
 
@@ -164,15 +165,16 @@
           players.forEach(this.drawPlayer.bind(this))
       }
 
-      Animator.prototype.showText = function (text,color) {
-          this.clear()
-		  if(color){
-			this.ctx.fillStyle = color
-		  }else{
-			this.ctx.fillStyle = "white"
-		  }
-          this.ctx.font = "bold 24px Arial"
-          this.ctx.fillText(text, (this.bounds.width - 300) / 2, this.bounds.height / 2)
+      Animator.prototype.showText = function (text, color) {
+        this.clear()
+
+		    if(color){
+			    this.ctx.fillStyle = color
+		    } else {
+			    this.ctx.fillStyle = "white"
+		    }
+        this.ctx.font = "bold 24px Arial"
+        this.ctx.fillText(text, (this.bounds.width - 300) / 2, this.bounds.height / 2)
       }
 
       Animator.prototype.clear = function () {
@@ -183,7 +185,7 @@
           this.ctx.fillStyle = "#202020"
           this.ctx.fillRect(this.bounds.width-200, 0, this.bounds.height, this.bounds.width)
       }
-	  
+
       Animator.prototype.showScoreboard = function (round, players) {
 		  this.clearScore()
           this.ctx.font = "bold 24px Arial"
