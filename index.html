@@ -109,8 +109,8 @@
           switch (message.event) {
           case "end":
               if (message.data) {
-                  var winner = message.data.name
-                  this.animator.showText(winner + " won")
+                  var winner = message.data
+                  this.animator.showText(winner.name + " won",winner.color)
               } else {
                   this.animator.clear()
                   this.exit();
@@ -164,9 +164,13 @@
           players.forEach(this.drawPlayer.bind(this))
       }
 
-      Animator.prototype.showText = function (text) {
+      Animator.prototype.showText = function (text,color) {
           this.clear()
-          this.ctx.fillStyle = "white"
+		  if(color){
+			this.ctx.fillStyle = color
+		  }else{
+			this.ctx.fillStyle = "white"
+		  }
           this.ctx.font = "bold 24px Arial"
           this.ctx.fillText(text, (this.bounds.width - 300) / 2, this.bounds.height / 2)
       }
