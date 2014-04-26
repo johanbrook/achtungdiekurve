@@ -1,0 +1,158 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Achtung Die Kurve!</title>
+    <meta charset="utf-8" />
+    <script>
+      var Helpers = {
+        isObjectValue: function(obj, prop) {
+          return Object.keys(obj).map(function(key) { return obj[key] }).indexOf(prop) !== -1
+        }
+      }
+
+      var init = function() {
+        console.log("Init game")
+
+        var canvas = document.createElement("canvas")
+        canvas.width = 800
+        canvas.height = 600
+
+        var game = new Game(canvas)
+
+        document.getElementsByTagName("body")[0].appendChild(canvas)
+      }
+
+      var Game = function(canvas) {
+        this.animator = new Animator(canvas)
+
+        this.keys = { left: 37, right: 39 }
+
+        document.addEventListener("keydown", this.changeDirection.bind(this))
+
+        this.socket = new WebSocket("ws://129.16.236.124:8881/command")
+        this.socket.onmessage = this.update.bind(this)
+        this.socket.onclose = this.disconnect.bind(this)
+      }
+
+      Game.prototype.changeDirection = function(evt) {
+        if(!Helpers.isObjectValue(this.keys, evt.keyCode)) return;
+
+        evt.preventDefault()
+
+        var key = evt.keyCode,
+            dir = null
+        switch(key) {
+        case this.keys.left: dir = "left"; break;
+        case this.keys.right: dir = "right"; break;
+        default: dir = null;
+        }
+
+        this.socket.send(JSON.stringify({
+          direction: dir
+        }))
+      }
+
+      Game.prototype.disconnect = function(evt) {
+        console.log("Server disconnected")
+        this.animator.showText("Server disconnected")
+      }
+
+      Game.prototype.update = function(evt) {
+        var message = JSON.parse(evt.data)
+
+        switch(message.event) {
+        case "end":
+          if(message.data) {
+            var winner = message.data.name
+            this.animator.showText(winner+ " won")
+          }
+          else {
+            this.animator.clear()
+            this.exit();
+          }
+          break;
+        case "init":
+          this.animator.clear()
+          this.animator.showText("Waiting for players to connect")
+          break;
+        case "newRound":
+          this.animator.clear()
+          break;
+        case "world":
+          var data = message.data
+          if(data.players) {
+            this.animator.drawPlayers(data.players)
+            this.animator.showScoreboard(data.players)
+          }
+
+          //this.animator.showText("Round: "+data.round)
+          break;
+        }
+      }
+
+      Game.prototype.exit = function(evt) {
+        console.log("Game over")
+        this.animator.showText("Exit. Restarting in 3 seconds")
+      }
+
+
+      var Animator = function(canvas) {
+        this.canvas = canvas
+        this.ctx = canvas.getContext("2d")
+        this.bounds = {
+          width: canvas.width,
+          height: canvas.height
+        }
+      }
+
+      Animator.prototype.drawPlayers = function(players) {
+        players.forEach(this.drawPlayer.bind(this))
+      }
+
+      Animator.prototype.showText = function(text) {
+        this.clear()
+        this.ctx.fillStyle = "white"
+        this.ctx.font = "bold 24px Arial"
+        this.ctx.fillText(text, (this.bounds.width - 300) / 2, this.bounds.height / 2)
+      }
+
+      Animator.prototype.clear = function() {
+        this.ctx.clearRect(0, 0, this.bounds.width, this.bounds.height)
+      }
+
+      Animator.prototype.showScoreboard = function(players) {
+        this.ctx.fillStyle = "white"
+        this.ctx.font = "bold 16px Arial"
+        var interval = 50
+
+        players.forEach(function(player, index) {
+          this.ctx.fillText("round", (index+1) * interval, 20)
+        }.bind(this))
+      }
+
+      Animator.prototype.drawPlayer = function(data) {
+        if(!data.inRound) return
+
+        this.ctx.fillStyle = data.color
+        this.ctx.beginPath()
+
+        this.ctx.fillRect(data.head.x, data.head.y, 5, 5)
+
+        this.ctx.closePath()
+        this.ctx.fill()
+      }
+
+      document.addEventListener("DOMContentLoaded", init)
+
+    </script>
+    <style>
+      canvas {
+        background-color: #000;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- By Brook & Bohn -->
+  </body>
+</html>
