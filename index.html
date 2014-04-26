@@ -16,7 +16,9 @@
       config = {
         width: 800,
         height: 600,
-        strokeSize: 5
+        strokeSize: 5,
+        host: "83.209.183.141",
+        port: 8881
       }
 
       var init = function () {
@@ -39,7 +41,7 @@
           document.addEventListener("keydown", this.keyDown.bind(this))
           document.addEventListener("keyup", this.keyUp.bind(this))
 
-          this.socket = new WebSocket("ws://83.209.183.141:8881/command")
+          this.socket = new WebSocket("ws://"+config.host+":"+config.port+"/command")
           this.socket.onmessage = this.update.bind(this)
           this.socket.onclose = this.disconnect.bind(this)
       }
