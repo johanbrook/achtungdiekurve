@@ -136,7 +136,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 	}
 
 	public void send(final String s) throws IOException {
-		if (con != null) {
+		if (con != null && con.isOpen()) {
 			new Thread(new Runnable() {
 				public void run() {
 					try {

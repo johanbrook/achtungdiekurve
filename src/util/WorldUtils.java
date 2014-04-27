@@ -1,7 +1,7 @@
 package util;
 
 import java.awt.Color;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import model.Coordinate;
@@ -11,10 +11,10 @@ import model.World;
 public class WorldUtils {
 
 	public static List<Player> getRoundPlayers() {
-		List<Player> l = new LinkedList<Player>();
-		for (Player p : World.getInstance().getPlayers()) {
-			if (p.isInRound()) {
-				l.add(p);
+		List<Player> l = new ArrayList<Player>();
+		for (int i = 0; i < World.getInstance().getPlayers().size(); i++) {
+			if (World.getInstance().getPlayers().get(i).isInRound()) {
+				l.add(World.getInstance().getPlayers().get(i));
 			}
 		}
 		return l;
@@ -37,7 +37,8 @@ public class WorldUtils {
 	}
 
 	public static boolean containHead(double x, double y) {
-		for (Player p : World.getInstance().getPlayers()) {
+		for (int i = 0; i < World.getInstance().getPlayers().size(); i++) {
+			Player p = World.getInstance().getPlayers().get(i);
 			double dX = p.getHead().x - x;
 			double dY = p.getHead().y - y;
 			if (Math.hypot(dX, dY) < 50) {
@@ -56,8 +57,8 @@ public class WorldUtils {
 	}
 
 	public static boolean containName(String name) {
-		for (Player p : World.getInstance().getPlayers()) {
-			if (p.getName().equals(name)) {
+		for (int i = 0; i < World.getInstance().getPlayers().size(); i++) {
+			if (World.getInstance().getPlayers().get(i).getName().equals(name)) {
 				return true;
 			}
 		}
@@ -79,8 +80,8 @@ public class WorldUtils {
 	}
 
 	public static boolean containsSimilarColor(Color c) {
-		for (Player p : World.getInstance().getPlayers()) {
-			if (isSimilarColor(hex2Rgb(p.getColor()), c)) {
+		for (int i = 0; i < World.getInstance().getPlayers().size(); i++) {
+			if (isSimilarColor(hex2Rgb(World.getInstance().getPlayers().get(i).getColor()), c)) {
 				return true;
 			}
 		}
@@ -91,7 +92,7 @@ public class WorldUtils {
 		int dR = Math.abs(c1.getRed() - c2.getRed());
 		int dG = Math.abs(c1.getGreen() - c2.getGreen());
 		int dB = Math.abs(c1.getBlue() - c2.getBlue());
-		return (dR + dG + dB) < 50;
+		return (dR + dG + dB) < 100;
 	}
 
 	public static Color hex2Rgb(String colorStr) {

@@ -4,9 +4,10 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.Timer;
 
@@ -32,7 +33,7 @@ public class World implements ActionListener {
 	private World() {
 		gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 		t = new Timer(40, this);
-		players = new LinkedList<Player>();
+		players = new ArrayList<Player>();
 		worldSize = new Dimension(800, 600);
 	}
 
@@ -53,8 +54,8 @@ public class World implements ActionListener {
 
 	private void newRound() {
 		round++;
-		for (Player p : getPlayers()) {
-			p.newRound();
+		for (int i = 0;i<players.size();i++) {
+			players.get(i).newRound();
 		}
 		roundPlayers = WorldUtils.getRoundPlayers();
 		send(new JsonObject("newRound", this));
@@ -66,19 +67,18 @@ public class World implements ActionListener {
 	}
 
 	private void endRound(Player winner, boolean send) {
-		for (Player p : getPlayers()) {
-			p.endRound();
+		for (int i = 0; i< players.size();i++) {
+			players.get(i).endRound();
 		}
 		if (send) {
 			send(new JsonObject("end", winner));
 		}
 	}
-
 	public void send(JsonObject o) {
+		String s = gson.toJson(o);
 		for (int i = 0; i < players.size(); i++) {
 			Player p = players.get(i);
 			try {
-				String s = gson.toJson(o);
 				p.send(s);
 			} catch (IOException e) {
 				players.remove(i);
@@ -97,7 +97,8 @@ public class World implements ActionListener {
 			}
 			newRound();
 		} else {
-			for (Player p : roundPlayers) {
+			for (int i = 0;i<roundPlayers.size();i++) {
+				Player p = roundPlayers.get(i);
 				if (p.isAlive()) {
 					p.updateMove();
 					if (p.isOutsideRange(worldSize)) {
@@ -105,8 +106,8 @@ public class World implements ActionListener {
 						givePointsToAllBut(p);
 						send(new JsonObject("score", this));
 					} else {
-						for (Player e : roundPlayers) {
-							if (p.collideWith(e)) {
+						for (int j =0;j<roundPlayers.size();j++) {
+							if (p.collideWith(roundPlayers.get(j))) {
 								p.setAlive(false);
 								givePointsToAllBut(p);
 								send(new JsonObject("score", this));
@@ -120,9 +121,9 @@ public class World implements ActionListener {
 	}
 
 	public void givePointsToAllBut(Player p) {
-		for (Player pp : roundPlayers) {
-			if (!p.equals(pp) && pp.isAlive()) {
-				pp.addPoint();
+		for (int i = 0;i<roundPlayers.size();i++) {
+			if (!p.equals(roundPlayers.get(i)) && roundPlayers.get(i).isAlive()) {
+				roundPlayers.get(i).addPoint();
 			}
 		}
 		Collections.sort(players);
@@ -140,6 +141,7 @@ public class World implements ActionListener {
 	}
 
 	public void playerDisconnect(Player p) {
+		p.setAlive(false);
 		players.remove(p);
 		if (players.size() == 1) {
 			t.stop();
@@ -150,8 +152,8 @@ public class World implements ActionListener {
 
 	private int numbersAlive() {
 		int alive = 0;
-		for (Player p : roundPlayers) {
-			if (p.isAlive()) {
+		for (int i = 0;i <roundPlayers.size();i++) {
+			if (roundPlayers.get(i).isAlive()) {
 				alive++;
 			}
 		}
@@ -160,9 +162,9 @@ public class World implements ActionListener {
 
 	private Player getIfAllButOneDead() {
 		if (numbersAlive() == 1) {
-			for (Player p : roundPlayers) {
-				if (p.isAlive()) {
-					return p;
+			for (int i = 0;i<roundPlayers.size();i++) {
+				if (roundPlayers.get(i).isAlive()) {
+					return roundPlayers.get(i);
 				}
 			}
 		}
