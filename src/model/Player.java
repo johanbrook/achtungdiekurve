@@ -30,6 +30,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 	@Expose
 	private boolean isAlive;
 	private Connection con;
+	@Expose
 	private double direction;
 	private double speed = 3;
 	private PlayerCommand pc;
@@ -127,7 +128,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 		if (stepsToChangePaint-- == 0) {
 			paintTail = !paintTail;
 			if (paintTail) {
-				stepsToChangePaint = (int) (Math.random() * 300);
+				stepsToChangePaint = (int) (Math.random() * 200);
 			} else {
 				stepsToChangePaint = 5;
 			}
@@ -160,7 +161,7 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 	}
 
 	public void newRound() {
-		stepsToChangePaint = (int) (Math.random() * 300);
+		stepsToChangePaint = (int) (Math.random() * 200);
 		paintTail = true;
 		direction = Math.random() * 360;
 		path = new LinkedList<Coordinate>();

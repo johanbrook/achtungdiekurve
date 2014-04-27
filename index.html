@@ -11,6 +11,9 @@
               }).indexOf(prop) !== -1
           }
       }
+	  
+
+	  
       var leftDown, rightDown,
 
       config = {
@@ -46,8 +49,13 @@
           this.socket.onclose = this.disconnect.bind(this)
 
           this.events = {
-            init: function() {
+            init: function(message) {
               this.animator.clear()
+			  this.animator.clearScore()
+			  var data = message.data
+              if (data.players) {
+                  this.animator.showScoreboard(data.round, data.players)
+              }
               this.animator.showText("Waiting for players to connect")
             },
             end: function(message) {
@@ -72,11 +80,16 @@
                   this.animator.showScoreboard(data.round, data.players)
               }
             },
+			start: function(message) {
+              this.animator.clear()
+            },
             newRound: function(message) {
               this.animator.clear()
               var data = message.data
               if (data.players) {
+			      this.animator.drawPlayers(data.players)
                   this.animator.showScoreboard(data.round, data.players)
+				  this.animator.drawPlayersArrow(data.players)
               }
             }
           }
@@ -198,6 +211,31 @@
           }.bind(this))
       }
 
+      Animator.prototype.drawPlayersArrow = function (players) {	  
+		players.forEach(function (player, index) {
+			this.ctx.strokeStyle = player.color
+			this.ctx.beginPath()
+			var angle = player.direction * (Math.PI / 180)
+			var tox = player.head.x + (Math.cos(angle) *30)
+			var toy = player.head.y + (Math.sin(angle) *30)
+			this.drawPlayerArrow(this.ctx, player.head.x,player.head.y, tox, toy)
+			this.ctx.closePath()
+			this.ctx.stroke()
+        }.bind(this))
+	  }
+	  
+	  Animator.prototype.drawPlayerArrow = function(context, fromx, fromy, tox, toy){
+		var headlen = 10;	// length of head in pixels
+		var dx = tox-fromx;
+		var dy = toy-fromy;
+		var angle = Math.atan2(dy,dx);
+		context.moveTo(fromx, fromy);
+		context.lineTo(tox, toy);
+		context.lineTo(tox-headlen*Math.cos(angle-Math.PI/6),toy-headlen*Math.sin(angle-Math.PI/6));
+		context.moveTo(tox, toy);
+		context.lineTo(tox-headlen*Math.cos(angle+Math.PI/6),toy-headlen*Math.sin(angle+Math.PI/6));
+	}
+	  
       Animator.prototype.drawPlayer = function (data) {
           if (!data.inRound) return
 
@@ -208,7 +246,7 @@
 
           this.ctx.fillRect(data.head.x, data.head.y, size, size)
 
-          if (!data.lasthead.isVisible) {
+          if (data.lasthead && !data.lasthead.isVisible) {
               this.ctx.fillStyle = "#000000"
               this.ctx.fillRect(data.lasthead.x, data.lasthead.y, size, size)
           }

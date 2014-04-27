@@ -1,4 +1,5 @@
 package model;
+
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -57,6 +58,11 @@ public class World implements ActionListener {
 		}
 		roundPlayers = WorldUtils.getRoundPlayers();
 		send(new JsonObject("newRound", this));
+		try {
+			Thread.sleep(1500);
+		} catch (InterruptedException e) {
+		}
+		send(new JsonObject("start", this));
 	}
 
 	private void endRound(Player winner, boolean send) {
@@ -86,7 +92,7 @@ public class World implements ActionListener {
 		if (alive != null) {
 			endRound(alive, true);
 			try {
-				Thread.sleep(3000);
+				Thread.sleep(1500);
 			} catch (InterruptedException e) {
 			}
 			newRound();
@@ -129,7 +135,7 @@ public class World implements ActionListener {
 			newRound();
 			t.start();
 		} else if (players.size() < 2) {
-			send(new JsonObject("init", null));
+			send(new JsonObject("init", this));
 		}
 	}
 
@@ -137,21 +143,29 @@ public class World implements ActionListener {
 		players.remove(p);
 		if (players.size() == 1) {
 			t.stop();
-			endRound(null, false);
+			players.get(0).addPoint();
+			send(new JsonObject("init", this));
 		}
 	}
 
-	private Player getIfAllButOneDead() {
-		Player pl = null;
+	private int numbersAlive() {
+		int alive = 0;
 		for (Player p : roundPlayers) {
 			if (p.isAlive()) {
-				if (pl == null) {
-					pl = p;
-				} else {
-					return null;
+				alive++;
+			}
+		}
+		return alive;
+	}
+
+	private Player getIfAllButOneDead() {
+		if (numbersAlive() == 1) {
+			for (Player p : roundPlayers) {
+				if (p.isAlive()) {
+					return p;
 				}
 			}
 		}
-		return pl;
+		return null;
 	}
 }
