@@ -81,7 +81,6 @@ public class World implements ActionListener {
 		}
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent event) {
 		Player alive = getIfAllButOneDead();
 		if (alive != null) {

@@ -79,18 +79,15 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 		points++;
 	}
 
-	@Override
 	public void onClose(int arg0, String arg1) {
 		World.getInstance().playerDisconnect(this);
 	}
 
-	@Override
 	public void onOpen(Connection arg0) {
 		this.con = arg0;
 		World.getInstance().playerConnect(this);
 	}
 
-	@Override
 	public void onMessage(String msg) {
 		try {
 			PlayerCommand c = new Gson().fromJson(msg, PlayerCommand.class);
@@ -137,9 +134,16 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 		}
 	}
 
-	public void send(String s) throws IOException {
+	public void send(final String s) throws IOException {
 		if (con != null) {
-			con.sendMessage(s);
+			new Thread(new Runnable() {
+				public void run() {
+					try {
+						con.sendMessage(s);
+					} catch (IOException e) {
+					}
+				}
+			}).start();
 		}
 	}
 
@@ -212,7 +216,6 @@ public class Player implements WebSocket.OnTextMessage, Comparable<Player> {
 		return false;
 	}
 
-	@Override
 	public int compareTo(Player o) {
 		return o.points-points;
 	}
